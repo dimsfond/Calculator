@@ -1,0 +1,87 @@
+html, body {
+    margin:0;
+    padding:0;
+    overflow: hidden;
+    width: 100%;
+    height: 100vh;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: aquamarine;
+    /* border: 2px solid black; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+.calculator {
+    /* border: 2px solid black; */
+    width: 18%;
+    height: 55%;
+    border-radius: 15px;
+    background-color: rgb(48, 46, 46);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.screen {
+    /* border: 2px solid black; */
+    background-color: black;
+    width: 90%;
+    height: 15%;
+    border-radius: 10px;
+}
+
+.buttons {
+    /* border: 2px solid black; */
+    height: 50%;
+    flex: 1;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.buttons button {
+    background-color: rgb(48, 46, 46);
+    color: white;
+}
+
+.top-half, .bottom-half {
+    flex: 1;
+    border: 2px solid black;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.first-row, .second-row, .third-row {
+    flex: 1;
+    /* border: 2px solid black; */
+    display: flex;
+    gap: 8px;
+}
+
+.top-half button {
+    flex: 1;
+}
+
+
+/* first-row, .second-row, .third-row, .fourth-row, .fifth-row, .equals{ */ */
+    /* display: flex; */
+    /* justify-content: space-between; */
+    /* gap: 8px; */
+    /* border: 2px solid black; */
+    /* height: 12%; */
+    /* flex: 1; */
+/* } */
