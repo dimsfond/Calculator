@@ -23,18 +23,24 @@ function operate(a, b, op) {
 }
 
 function display(button, currentInput) {
-    if (!(isNaN(button)) || (["-", "."].includes(button) && currentInput.length === 0)) {
-        currentInput += button;
-        operation.textContent = currentInput;
-    }
-    if (currentInput.length >= 1) {
-        if (button === "C") {
-            currentInput = "";
-            operation.textContent = "";
-        } else if (button === "DEL") {
-            currentInput = currentInput.split("").slice(0, -1).join("");
+    if (!(isNaN(button))) {
+        if(!(isNaN(button)) && currentInput === "0") {
+            currentInput = button;
+            operation.textContent = currentInput;
+        } else {
+            currentInput += button;
             operation.textContent = currentInput;
         }
+    } else if(button === "." && !(currentInput.includes("."))) {
+        currentInput += button;
+        operation.textContent = currentInput;
+    } else if (button === "C") {
+        currentInput = "0";
+        operation.textContent = currentInput;
+    } else if (button === "DEL" && currentInput !== "0") {
+        currentInput = currentInput.split("").slice(0, -1).join("");
+        if (currentInput === "") currentInput = "0";
+        operation.textContent = currentInput;
     }
     return currentInput;
 }
@@ -44,7 +50,8 @@ const operation = document.createElement("p");
 screen.appendChild(operation);
 let num1, num2, op;
 
-let input = "";
+let input = "0";
+operation.textContent = input;
 const buttons = document.querySelectorAll("button");
 buttons.forEach(button => {
     button.addEventListener("click", (e) => {
