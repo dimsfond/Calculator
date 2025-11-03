@@ -243,13 +243,11 @@ buttons.forEach(button => {
     button.addEventListener("click", (e) => {
         const target = e.target;
         input = display(target, input);
-        console.log(input);
     })
 })
 
 document.addEventListener("keydown", (e) => {
     const key = e.key;
-    console.log(key);
     if (!isNaN(key)) {
         input = handleNumber(key, input);
     } else if (key === "." && !operators.some(op => input.slice(-1) === op)) {
