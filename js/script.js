@@ -134,7 +134,6 @@ function handleDelete(currentInput) {
 }
 
 function handleOperator(value, button, currentInput) {
-    // highlightOperator(button);
     if (operators.includes(currentInput.slice(-1))) {
         const lastOp = currentInput.slice(-1);
         if (["x", "/"].includes(lastOp) && ["+", "-"].includes(value)) {
@@ -224,6 +223,9 @@ function display(button, currentInput) {
     return currentInput;
 }
 
+function findButton(op) {
+    return Array.from(buttons).find(btn => btn.textContent === op);
+}
 const screen = document.querySelector(".screen");
 const operation = document.createElement("p");
 screen.appendChild(operation);
@@ -243,4 +245,24 @@ buttons.forEach(button => {
         input = display(target, input);
         console.log(input);
     })
+})
+
+document.addEventListener("keydown", (e) => {
+    const key = e.key;
+    console.log(key);
+    if (!isNaN(key)) {
+        input = handleNumber(key, input);
+    } else if (key === "." && !operators.some(op => input.slice(-1) === op)) {
+        input = handleDecimal(input);
+    } else if (key === "Backspace") {
+        input = handleDelete(input);
+    } else if (key === "Delete") {
+        input = handleClear(input);
+    } else if (["+", "-", "*", "/"].includes(key)) {
+        let op = key;
+        if (key === "*") op = "x";
+        input = handleOperator(op, findButton(op), input);
+    } else if (key === "Enter" || key === "=") {
+        input = handleEquals(input);
+    }
 })
