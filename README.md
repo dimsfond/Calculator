@@ -1,6 +1,6 @@
 # Calculator
 
-A browser-based Calculator project, built as part of The Odin Project online course (https://www.theodinproject.com/lessons/foundations-landing-page). Perform basic arithmetic operations with a simple and intuitive interface. Keyboard input is also supported. 
+A browser-based Calculator project, built as part of The Odin Project online course (https://www.theodinproject.com). Perform basic arithmetic operations with a simple and intuitive interface. Keyboard input is also supported. 
 
 ---
 
