@@ -33,7 +33,7 @@ A browser-based Calculator project, built as part of The Odin Project online cou
 
 ## Screenshots
 
-<img src="./screenshots/calculator-desktop.png" alt="Calculator Desktop" width="800">  
+<img src="./screenshots/calculator-dekstop.png" alt="Calculator Desktop" width="800">  
 
 ---
 
