@@ -45,7 +45,7 @@ function resetActiveOperator() {
 function formatResult(result) {
     let absResult = Math.abs(result);
     if ((absResult !== 0 && (absResult < 0.001 || absResult > Math.pow(10, MAX_LENGTH)))) {
-        return Number(result).toExponential(MAX_LENGTH - 5); // NEW: keep it compact
+        return Number(result).toExponential(MAX_LENGTH - 5);
         }
     let rounded = Math.round(result * 1000) / 1000;
     let str = rounded.toString();
