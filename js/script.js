@@ -108,33 +108,49 @@ function handleDelete(currentInput) {
         currentInput = currentInput.slice(0, -1);
         if (operators.includes(lastChar)) {
             resetActiveOperator();
+        }
+        let newLastChar = currentInput.slice(-1);
+        if (currentInput === "" || currentInput === "-") {
+            currentInput = "0";
+            operation.textContent = "0";
+        } else if (operators.includes(newLastChar)) {
+            operation.textContent = "0";
         } else {
-            let newLastChar = currentInput.slice(-1);
-            if (currentInput === "" || currentInput === "-") {
-                currentInput = "0";
-                operation.textContent = "0";
-            } else if (operators.includes(newLastChar)) {
-                operation.textContent = "0";
-            } else {
-                operation.textContent = operation.textContent.slice(0, -1);
+            let lastOpIndex = -1;
+            for (let op of operators) {
+                const idx = currentInput.lastIndexOf(op);
+                if (idx > lastOpIndex) {
+                    lastOpIndex = idx;
+                }
             }
+            operation.textContent = currentInput.slice(lastOpIndex + 1) || "0";
         }
     }
     return currentInput;
 }
 
 function handleOperator(value, button, currentInput) {
-    highlightOperator(button);
+    // highlightOperator(button);
     if (operators.includes(currentInput.slice(-1))) {
+        const lastOp = currentInput.slice(-1);
+        if (["x", "/"].includes(lastOp) && ["+", "-"].includes(value)) {
+            currentInput += value;
+            currentOp = lastOp;
+            return currentInput;
+        }
         currentOp = value;
         currentInput = currentInput.slice(0, -1) + value;
+        highlightOperator(button);
         return currentInput;
     }
     if (currentInput.includes("=")) {
         currentInput = currentInput.split("=")[1];
     }
-    if (operators.some(op => currentInput.includes(op))) {
-        const previousOpIdx = [...currentInput].findIndex((op, idx) => operators.includes(op) && idx !== 0);
+    if (operators.some(op => {
+        const idx = currentInput.lastIndexOf(op);
+        return idx !== 0 && currentInput[idx - 1] && currentInput[idx - 1].toLowerCase() !== "e";
+    })) {
+        const previousOpIdx = [...currentInput].findIndex((op, idx) => operators.includes(op) && idx !== 0 && currentInput[idx - 1].toLowerCase() !== "e");
         const previousOp = currentInput.charAt(previousOpIdx);
         let num1 = currentInput.slice(0, previousOpIdx);
         let num2 = currentInput.slice(previousOpIdx + 1);
@@ -148,9 +164,11 @@ function handleOperator(value, button, currentInput) {
         currentOp = value;
         currentInput = resultStr + currentOp;
         operation.textContent = resultStr;
+        highlightOperator(button);
     } else {
         currentOp = value;
         currentInput += value;
+        highlightOperator(button);
     }
     return currentInput;
 }
@@ -160,9 +178,12 @@ function handleEquals(currentInput) {
     if (currentInput.includes("=")) {
         return currentInput;
     }
-    const opIndex = [...currentInput].findIndex((char, idx) => operators.includes(char) && idx !== 0);
+    const opIndex = [...currentInput].findIndex((char, idx) => operators.includes(char) && idx !== 0 && currentInput[idx - 1].toLowerCase() !== "e");
     let num1 = currentInput.slice(0, opIndex);
     let num2 = currentInput.slice(opIndex + 1);
+    if ((num1 === "" && ["-", "+"].includes(currentInput[0])) || num2 === "") {
+        return currentInput;
+    }
     if (num2 !== "" && opIndex !== -1) {
         let result = operate(+num1, +num2, currentOp);
         if (result === "ERROR") {
@@ -207,7 +228,7 @@ const operatorButton = document.querySelector("#sum");
 const rgb = window.getComputedStyle(operatorButton).backgroundColor;
 let activeOperatorButton = null;
 let currentOp = null;
-const MAX_LENGTH = 14;
+const MAX_LENGTH = 13;
 
 let input = "0";
 operation.textContent = input;
