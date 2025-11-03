@@ -42,9 +42,11 @@ body {
     border-radius: 10px;
     color: white;
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     font-size: 50px;
+    padding-right: 2px;
+    padding-left: 2px;;
 }
 
 .buttons {

@@ -16,13 +16,13 @@ function div (a, b) {
 }
 
 function operate(a, b, op) {
-    if (op === "+") return add(a, b).toFixed(3);
-    else if (op === "-") return sub(a, b).toFixed(3);
-    else if (op === "x") return mul(a, b).toFixed(3);
+    if (op === "+") return add(a, b);
+    else if (op === "-") return sub(a, b);
+    else if (op === "x") return mul(a, b);
     else if (op === "/") {
         const result = div(a, b);
         if (result === "ERROR") return result;
-        else return result.toFixed(3);
+        else return result;
     }
 }
 
@@ -42,106 +42,159 @@ function resetActiveOperator() {
     }
 }
 
+function formatResult(result) {
+    let rounded = Math.round(result * 1000) / 1000;
+    let str = rounded.toString();
+    if (str.replace('.', '').length > MAX_LENGTH) {
+        str = Number(rounded).toExponential(MAX_LENGTH - 5);
+    }
+    return str;
+}
+
+function handleNumber(value, currentInput) {
+    const lastOpIdx = Math.max(
+        currentInput.lastIndexOf('+'),
+        currentInput.lastIndexOf('-'),
+        currentInput.lastIndexOf('x'),
+        currentInput.lastIndexOf('/')
+    );
+    let currentNumber = currentInput.slice(lastOpIdx + 1);
+    if (currentNumber.replace('.', '').length >= MAX_LENGTH) return currentInput;
+    if (currentInput === "0" || currentInput.includes("=")) {
+        currentInput = value;
+        operation.textContent = value;
+    } else {
+        if (isNaN(currentInput.slice(-1)) && currentInput.slice(-1) !== ".") operation.textContent = value;
+        else operation.textContent += value;
+        currentInput += value;
+    }
+    return currentInput;
+}
+
+function handleDecimal(currentInput) {
+    let lastOperatorIndex = -1;
+    for (let op of operators) {
+        const idx = currentInput.lastIndexOf(op);
+        if (idx > lastOperatorIndex) lastOperatorIndex = idx;
+    }
+    const currentNumber = currentInput.slice(lastOperatorIndex + 1);
+    if (!currentNumber.includes(".")) {
+        currentInput += ".";
+        operation.textContent = currentNumber + ".";
+    }
+    return currentInput;
+}
+
+function handleClear(currentInput) {
+    currentInput = "0";
+    operation.textContent = "0";
+    resetActiveOperator();
+    return currentInput;
+}
+
+function handleDelete(currentInput) {
+    if (currentInput.includes ("=")) {
+        let [beforeEq, result] = currentInput.split("=");
+        result = result.slice(0, -1);
+        if (result === "") {
+            currentInput = "0";
+            operation.textContent = "0";
+        } else {
+            currentInput = result;
+            operation.textContent = result;
+        }
+    } else {
+        let lastChar = currentInput.slice(-1);
+        currentInput = currentInput.slice(0, -1);
+        if (operators.includes(lastChar)) {
+            resetActiveOperator();
+        } else {
+            let newLastChar = currentInput.slice(-1);
+            if (currentInput === "" || currentInput === "-") {
+                currentInput = "0";
+                operation.textContent = "0";
+            } else if (operators.includes(newLastChar)) {
+                operation.textContent = "0";
+            } else {
+                operation.textContent = operation.textContent.slice(0, -1);
+            }
+        }
+    }
+    return currentInput;
+}
+
+function handleOperator(value, button, currentInput) {
+    highlightOperator(button);
+    if (operators.includes(currentInput.slice(-1))) {
+        currentOp = value;
+        currentInput = currentInput.slice(0, -1) + value;
+        return currentInput;
+    }
+    if (currentInput.includes("=")) {
+        currentInput = currentInput.split("=")[1];
+    }
+    if (operators.some(op => currentInput.includes(op))) {
+        const previousOpIdx = [...currentInput].findIndex((op, idx) => operators.includes(op) && idx !== 0);
+        const previousOp = currentInput.charAt(previousOpIdx);
+        let num1 = currentInput.slice(0, previousOpIdx);
+        let num2 = currentInput.slice(previousOpIdx + 1);
+        let result = operate(+num1, +num2, previousOp);
+        if (result === "ERROR") {
+            currentInput = "0";
+            operation.textContent = "ERROR"
+            return currentInput;
+        }
+        let resultStr = formatResult(result);
+        currentOp = value;
+        currentInput = resultStr + currentOp;
+        operation.textContent = resultStr;
+    } else {
+        currentOp = value;
+        currentInput += value;
+    }
+    return currentInput;
+}
+
+function handleEquals(currentInput) {
+    resetActiveOperator();
+    if (currentInput.includes("=")) {
+        return currentInput;
+    }
+    const opIndex = [...currentInput].findIndex((char, idx) => operators.includes(char) && idx !== 0);
+    let num1 = currentInput.slice(0, opIndex);
+    let num2 = currentInput.slice(opIndex + 1);
+    if (num2 !== "" && opIndex !== -1) {
+        let result = operate(+num1, +num2, currentOp);
+        if (result === "ERROR") {
+            currentInput = "0";
+            operation.textContent = "ERROR"
+        } else {
+            let resultStr = formatResult(result);
+            currentInput += "=" + resultStr;
+            operation.textContent = resultStr;
+        }
+    } else {
+        currentInput = "0";
+        operation.textContent = "ERROR"
+    }
+    return currentInput;
+}
+
 function display(button, currentInput) {
     const value = button.textContent;
     if (operation.textContent === "ERROR") operation.textContent = "0";
     if (!(isNaN(value))) {
-        if (currentInput === "0") {
-            currentInput = value;
-            operation.textContent = value;
-        } else if (currentInput.includes("=")) {
-            currentInput = value;
-            operation.textContent = value;
-        } else {
-            if (isNaN(currentInput.slice(-1)) && currentInput.slice(-1) !== ".") operation.textContent = value;
-            else operation.textContent += value;
-            currentInput += value;
-        }
+        currentInput = handleNumber(value, currentInput);
     } else if(value === "." && !operators.some(op => currentInput.slice(-1) === op)) {
-        let lastOperatorIndex = -1;
-        for (let symbol of operators) {
-            const idx = currentInput.lastIndexOf(symbol);
-            if (idx > lastOperatorIndex) lastOperatorIndex = idx;
-        }
-        const currentNumber = currentInput.slice(lastOperatorIndex + 1);
-        if (!currentNumber.includes(".")) {
-            currentInput += value;
-            operation.textContent = currentNumber + value;
-        }
+        currentInput = handleDecimal(currentInput);
     } else if (value === "C") {
-        currentInput = "0";
-        operation.textContent = "0";
-        resetActiveOperator();
+        currentInput = handleClear(currentInput);
     } else if (value === "DEL") {
-        if (currentInput.includes("=")) {
-            let [beforeEq, result] = currentInput.split("=");
-            result = result.slice(0, -1);
-            if (result === "") {
-                currentInput = "0";
-                operation.textContent = "0";
-            } else {
-                currentInput = result;
-                operation.textContent = result;
-            }
-        } else {
-            const lastChar = currentInput.slice(-1);
-            if (operators.includes(lastChar)) {
-                currentInput = currentInput.slice(0, -1);
-                resetActiveOperator();
-                operation.textContent = currentInput === "" ? "0" : currentInput;
-            } else {
-                currentInput = currentInput.slice(0, -1);
-                const newLastChar = currentInput.slice(-1);
-                if (operators.includes(newLastChar) || currentInput === "") {
-                    operation.textContent = "0";
-                } else {
-                    operation.textContent = currentInput;
-                }
-            }
-            if (currentInput === "" || currentInput === "-") {
-                currentInput = "0";
-                operation.textContent = currentInput;
-            }
-        }
-    } else if (["+", "-", "x", "/"].includes(value) && !operators.some(op => currentInput.slice(-1) === op)) {
-        highlightOperator(button);
-        if (operators.some(op => currentInput.includes(op)) && !currentInput.includes("=")) {
-            previousOp = operators.find(op => currentInput.includes(op));
-            const opIdx = [...currentInput].findIndex((char, idx) => operators.includes(char) && idx !== 0);
-            num1 = Number(currentInput.slice(0, opIdx));
-            if (currentInput.includes("=")) {
-                equalsIdx = currentInput.indexOf("=");
-                num2 = Number(currentInput.slice(opIdx + 1, equalsIdx));
-            } else num2 = Number(currentInput.slice(opIdx + 1));
-            const result = Number(operate(num1, num2, previousOp));
-            currentOp = value;
-            currentInput = result.toString() + currentOp;
-            operation.textContent = result;
-        } else if (currentInput.includes("=")) {
-            currentOp = value;
-            currentInput = currentInput.split("=")[1] + currentOp;
-        } else {
-            currentOp = value;
-            currentInput += `${value}`;
-        }
+        currentInput = handleDelete(currentInput);
+    } else if (["+", "-", "x", "/"].includes(value)) {
+        currentInput = handleOperator(value, button, currentInput);
     } else if (value === "=") {
-        resetActiveOperator();
-        const opIndex = [...currentInput].findIndex((char, idx) => operators.includes(char) && idx !== 0);
-        num1 = currentInput.slice(0, opIndex);
-        num2 = currentInput.slice(opIndex + 1);
-        if (num2 !== "" && opIndex !== undefined) {
-            const result = Number(operate(+num1, +num2, currentOp)).toString();
-            if (isNaN(result)) {
-                currentInput = "0";
-                operation.textContent = "ERROR"
-            } else {
-                currentInput += value + result;
-                operation.textContent = result;
-            }
-        } else {
-            currentInput = "0";
-            operation.textContent = "ERROR"
-        }
+        currentInput = handleEquals(currentInput);
     }
     return currentInput;
 }
@@ -150,10 +203,11 @@ const screen = document.querySelector(".screen");
 const operation = document.createElement("p");
 screen.appendChild(operation);
 const operators = ["+", "-", "x", "/"];
-let num1, num2, op;
-operatorButton = document.querySelector("#sum");
+const operatorButton = document.querySelector("#sum");
 const rgb = window.getComputedStyle(operatorButton).backgroundColor;
 let activeOperatorButton = null;
+let currentOp = null;
+const MAX_LENGTH = 14;
 
 let input = "0";
 operation.textContent = input;
@@ -162,5 +216,6 @@ buttons.forEach(button => {
     button.addEventListener("click", (e) => {
         const target = e.target;
         input = display(target, input);
+        console.log(input);
     })
 })
