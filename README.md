@@ -4,6 +4,10 @@ A browser-based Calculator project, built as part of The Odin Project online cou
 
 ---
 
+🔗 **Live Demo:** [dimsfond.github.io/Calculator](https://dimsfond.github.io/Calculator)
+
+---
+
 ## Built it using:
 - HTML  
 - CSS  
